@@ -1,40 +1,60 @@
 import React, { useEffect, useState } from 'react';
+import _ from 'lodash';
+
 import './MovieList.css';
 import MovieCard from '../MovieList/MovieCard';
 import Fire from '../../assets/fire.png';
+import FilterGroup from './FilterGroup';
 
 const MovieList = () => {
   const [movies, setMovies] = useState([]);
   const [filterMovies, setFilterMovies] = useState([]);
   const [minRating, setMinRating] = useState(0);
+  const [sort, setSort] = useState({
+    by: 'default',
+    order: 'asc'
+  });
 
   useEffect(() => {
     fetchMovies();
   }, []);
 
+  useEffect(() => {
+    if (sort.by !== 'default') {
+      const sortedMovies = _.orderBy(filterMovies, [sort.by], [sort.order]);
+      setFilterMovies(sortedMovies);
+    }
+  }, [sort]);
+
   const fetchMovies = async () => {
     try {
       const response = await fetch(
-        "https://api.themoviedb.org/3/movie/popular?api_key=b1bdc8abdee0945ebaa14ad8759c0d91"
+        'https://api.themoviedb.org/3/movie/popular?api_key=b1bdc8abdee0945ebaa14ad8759c0d91'
       );
       const data = await response.json();
       setMovies(data.results);
       setFilterMovies(data.results);
     } catch (error) {
-      console.error("Failed to fetch movies:", error);
+      console.error('Failed to fetch movies:', error);
     }
   };
 
   const handleFilter = (rate) => {
+    let filtered;
     if (rate === minRating) {
-      // If same rating is clicked again, reset filter
       setMinRating(0);
-      setFilterMovies(movies);
+      filtered = movies;
     } else {
       setMinRating(rate);
-      const filtered = movies.filter(movie => movie.vote_average >= rate);
-      setFilterMovies(filtered);
+      filtered = movies.filter((movie) => movie.vote_average >= rate);
     }
+
+    setFilterMovies(filtered);
+  };
+
+  const handleSort = (e) => {
+    const { name, value } = e.target;
+    setSort((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -46,36 +66,31 @@ const MovieList = () => {
         </h2>
 
         <div className="align_center movie_list_fs">
-          <ul className="align_center movie_filter">
-            <li
-              className={`movie_filter_item ${minRating === 8 ? 'active' : ''}`}
-              onClick={() => handleFilter(8)}
-            >
-              8+ Star
-            </li>
-            <li
-              className={`movie_filter_item ${minRating === 7 ? 'active' : ''}`}
-              onClick={() => handleFilter(7)}
-            >
-              7+ Star
-            </li>
-            <li
-              className={`movie_filter_item ${minRating === 6 ? 'active' : ''}`}
-              onClick={() => handleFilter(6)}
-            >
-              6+ Star
-            </li>
-          </ul>
+          <FilterGroup
+            minRating={minRating}
+            onRatingClick={handleFilter}
+            ratings={[8, 7, 6]}
+          />
 
-          <select name="" id="" className="movie_sorting">
-            <option value="">SortBy</option>
-            <option value="">Date</option>
-            <option value="">Rating</option>
+          <select
+            name="by"
+            onChange={handleSort}
+            value={sort.by}
+            className="movie_sorting"
+          >
+            <option value="default">Sort By</option>
+            <option value="release_date">Date</option>
+            <option value="vote_average">Rating</option>
           </select>
 
-          <select name="" id="" className="movie_sorting">
-            <option value="">Ascending</option>
-            <option value="">Descending</option>
+          <select
+            name="order"
+            onChange={handleSort}
+            value={sort.order}
+            className="movie_sorting"
+          >
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
           </select>
         </div>
       </header>
