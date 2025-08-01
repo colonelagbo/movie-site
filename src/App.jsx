@@ -4,7 +4,7 @@ import Fire from './assets/fire.png';
 import Star from './assets/glowing-star.png';
 import party from "./assets/partying-face.png";
 
-import Navbar from "./components/Navbar/Navbar";
+import Navbar from "./Components/Navbar/Navbar";
 import MovieList from './Components/MovieList/MovieList';
 
 const App = () => {
