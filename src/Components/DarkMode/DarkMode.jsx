@@ -14,15 +14,16 @@ const DarkMode = () => {
     localStorage.setItem("selectedTheme", "light");
   };
 
-  // Check theme on component mount
+  // ✅ Move selectedTheme outside useEffect so it can be reused
+  const selectedTheme = localStorage.getItem("selectedTheme");
+
   useEffect(() => {
-    const selectedTheme = localStorage.getItem("selectedTheme");
     if (selectedTheme === "light") {
       setLightTheme();
     } else {
       setDarkTheme();
     }
-  }, []);
+  }, [selectedTheme]);
 
   const toggleTheme = (e) => {
     if (e.target.checked) {
@@ -32,8 +33,6 @@ const DarkMode = () => {
     }
   };
 
-  const isDark = localStorage.getItem("selectedTheme") !== "light";
-
   return (
     <div className="dark_mode">
       <input
@@ -41,7 +40,7 @@ const DarkMode = () => {
         type="checkbox"
         id="darkmode-toggle"
         onChange={toggleTheme}
-        defaultChecked={isDark}
+        defaultChecked={selectedTheme !== "light"}
       />
       <label className="dark_mode_label" htmlFor="darkmode-toggle">
         <img src={sunIcon} alt="Sun" className="sun" />
